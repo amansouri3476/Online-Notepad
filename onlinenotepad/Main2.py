@@ -81,9 +81,9 @@ class TestWindow(QtWidgets.QMainWindow):
 
     def authenticate(self):
         username = self.ui.username_text.toPlainText()
-        password = self.ui.password_text.toPlainText()
+        password = self.ui.password_text.text()
         print(self.ui.username_text.toPlainText())
-        print(self.ui.password_text.toPlainText())
+        print(self.ui.password_text.text())
         # API
         t, message, code = notelyConnection.login_user(username, password)
         if not t:
@@ -93,12 +93,12 @@ class TestWindow(QtWidgets.QMainWindow):
 
     def register(self):
         print(self.ui.username_text_register.toPlainText())
-        print(self.ui.password_text_register.toPlainText())
+        print(self.ui.password_text_register.text())
         name = self.ui.name_text_register.toPlainText()
         lastname = self.ui.lastname_text_register.toPlainText()
         email = self.ui.email_text_register.toPlainText()
         username = self.ui.username_text_register.toPlainText()
-        password = self.ui.password_text_register.toPlainText()
+        password = self.ui.password_text_register.text()
         print(name, lastname, email, username, password)
         # API
         t, message, code = notelyConnection.signup_user(username, password, email, name, lastname)
@@ -216,6 +216,7 @@ class TestWindow(QtWidgets.QMainWindow):
                     self.ui.button.setText(_translate("MainWindow", note_name))
                     scrollareabuttons_decks.append(self.ui.button)
                     true, note, code = notelyConnection.get_note_user(note_name, 'Uncategorized')
+
                     self.ui.button.clicked.connect(partial(self.show_note, note.name, note.data, 'Uncategorized'))
 
                 self.ui.scrollAreaWidgetContents.setMinimumHeight(20 + 140 * len(message.list_notes))

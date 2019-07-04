@@ -456,7 +456,7 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
      <enum>QFrame::Plain</enum>
     </property>
     <property name="currentIndex">
-     <number>7</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QPushButton" name="quit_button">
@@ -1878,31 +1878,6 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
        <string notr="true">background-color: rgb(255, 255, 127);</string>
       </property>
      </widget>
-     <widget class="QTextEdit" name="password_text">
-      <property name="geometry">
-       <rect>
-        <x>180</x>
-        <y>550</y>
-        <width>251</width>
-        <height>61</height>
-       </rect>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>125</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Edwardian Script ITC</family>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(255, 255, 127);</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="sign_in_button">
       <property name="geometry">
        <rect>
@@ -1960,13 +1935,30 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
        <string>Back</string>
       </property>
      </widget>
+     <widget class="QLineEdit" name="password_text">
+      <property name="geometry">
+       <rect>
+        <x>182</x>
+        <y>560</y>
+        <width>251</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 127);
+border-color: rgb(0, 0, 0, 0);</string>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
+      </property>
+     </widget>
      <zorder>graphicsView_2</zorder>
      <zorder>username_label</zorder>
      <zorder>password_label</zorder>
      <zorder>username_text</zorder>
-     <zorder>password_text</zorder>
      <zorder>sign_in_button</zorder>
      <zorder>back_login_page</zorder>
+     <zorder>password_text</zorder>
     </widget>
     <widget class="QWidget" name="page_3">
      <widget class="QPushButton" name="register_button">
@@ -2035,25 +2027,6 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QTextEdit" name="password_text_register">
-      <property name="geometry">
-       <rect>
-        <x>760</x>
-        <y>610</y>
-        <width>256</width>
-        <height>59</height>
-       </rect>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>125</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(255, 255, 127);</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="email_label_register">
       <property name="geometry">
        <rect>
@@ -2087,7 +2060,7 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
        <rect>
         <x>330</x>
         <y>170</y>
-        <width>281</width>
+        <width>271</width>
         <height>61</height>
        </rect>
       </property>
@@ -2134,7 +2107,7 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
        <rect>
         <x>330</x>
         <y>280</y>
-        <width>281</width>
+        <width>271</width>
         <height>61</height>
        </rect>
       </property>
@@ -2258,11 +2231,27 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
        <string>Back</string>
       </property>
      </widget>
+     <widget class="QLineEdit" name="password_text_register">
+      <property name="geometry">
+       <rect>
+        <x>760</x>
+        <y>610</y>
+        <width>251</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 127);
+border-color: rgb(0, 0, 0, 0);</string>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
+      </property>
+     </widget>
      <zorder>graphicsView_3</zorder>
      <zorder>register_button</zorder>
      <zorder>email_text_register</zorder>
      <zorder>password_label_register</zorder>
-     <zorder>password_text_register</zorder>
      <zorder>email_label_register</zorder>
      <zorder>name_label_register</zorder>
      <zorder>name_text_register</zorder>
@@ -2271,6 +2260,7 @@ background-image: url(:/newPrefix/writing-pad-3583553.jpg);</string>
      <zorder>username_label_register</zorder>
      <zorder>username_text_register</zorder>
      <zorder>back_register_page</zorder>
+     <zorder>password_text_register</zorder>
     </widget>
     <widget class="QWidget" name="page_4">
      <widget class="QGraphicsView" name="graphicsView_5">
@@ -3077,13 +3067,11 @@ border-color: rgb(0, 0, 0, 0);</string>
  <tabstops>
   <tabstop>signup_button</tabstop>
   <tabstop>quit_button</tabstop>
-  <tabstop>password_text</tabstop>
   <tabstop>username_text</tabstop>
   <tabstop>login_button</tabstop>
   <tabstop>sign_in_button</tabstop>
   <tabstop>register_button</tabstop>
   <tabstop>email_text_register</tabstop>
-  <tabstop>password_text_register</tabstop>
   <tabstop>name_text_register</tabstop>
   <tabstop>lastname_text_register</tabstop>
   <tabstop>username_text_register</tabstop>

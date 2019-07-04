@@ -10,6 +10,9 @@ category_type = 'Uncategorized'
 reminder_dateTime = None
 deckName = None
 
+scrollareabuttons_decks = []
+scrollareabuttons_2_noteNames = []
+
 # noinspection PyPep8Naming
 class TestWindow(QtWidgets.QMainWindow):
 
@@ -24,6 +27,10 @@ class TestWindow(QtWidgets.QMainWindow):
         self.ui.scrollAreaWidgetContents_2.setLayout(QtWidgets.QVBoxLayout())
 
         # Connections for buttons
+
+        # Edit and Update buttons being hide
+        self.ui.page_newnote_edit_button.hide()
+        self.ui.page_newnote_update_button.hide()
 
         # Back Buttons
         self.ui.back_login_page.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
@@ -50,10 +57,15 @@ class TestWindow(QtWidgets.QMainWindow):
         self.ui.page_newnote_reminder_button.clicked.connect(self.setup_reminder)
         self.ui.dateTime_edit_done_button.clicked.connect(self.set_reminder)
 
+        self.ui.logout_button.clicked.connect(self.logout)
         self.ui.quit_button.clicked.connect(self.exit)
 
     def exit(self):
         sys.exit()
+
+    def logout(self):
+        self.ui.stackedWidget.setCurrentIndex(0)
+        notelyConnection.logout_user()
 
     def open_login_page(self):
         self.ui.stackedWidget.setCurrentIndex(1)
@@ -118,13 +130,22 @@ class TestWindow(QtWidgets.QMainWindow):
         self.ui.dateTime_edit_done_button.hide()
 
     def view_decks(self):
+        global scrollareabuttons_2_noteNames
+        global scrollareabuttons_decks
+        if len(scrollareabuttons_2_noteNames):
+            for button in scrollareabuttons_2_noteNames:
+                button.deleteLater()
+            scrollareabuttons_2_noteNames = []
+        if len(scrollareabuttons_decks):
+            for button in scrollareabuttons_decks:
+                button.deleteLater()
+            scrollareabuttons_decks = []
         self.ui.stackedWidget.setCurrentIndex(5)
         self.ui.label.setText('My Decks')
         # successful,message,htmlcode = api_view_deck()
         successful, message, code = notelyConnection.get_folder_list_user()
         if successful:
             print(message)
-            buttons = []
             if not message:
                 print('no decks available')
             else:
@@ -144,36 +165,41 @@ class TestWindow(QtWidgets.QMainWindow):
                     _translate = QtCore.QCoreApplication.translate
                     self.ui.button.show()
                     self.ui.button.setText(_translate("MainWindow", category))
-                    buttons.append(self.ui.button)
+                    scrollareabuttons_decks.append(self.ui.button)
+                    self.ui.button.clicked.connect(partial(self.show_category_notes, category))
                 self.ui.scrollAreaWidgetContents.setMinimumHeight(20 + 140 * len(message))
 
             print('##########################################################')
-            for button in buttons:
-                # Here we connect category buttons so that their notes can be showed in another page
-                # self.button.clicked.connect(self.show_category_notes(self.button.objectName()))
-                button.clicked.connect(partial(self.show_category_notes, button.objectName()))
 
-            self.ui.back_deck_page.clicked.connect(partial(self.deck_page_back, buttons))
+            self.ui.back_deck_page.clicked.connect(partial(self.deck_page_back))
 
-    def deck_page_back(self, buttons):
+    def deck_page_back(self):
         self.ui.stackedWidget.setCurrentIndex(3)
-        for button in buttons:
-            button.deleteLater()
+
         self.ui.back_deck_page.disconnect()
 
     def view_uncategorized_deck(self):
         self.ui.stackedWidget.setCurrentIndex(5)
+        global scrollareabuttons_2_noteNames
+        global scrollareabuttons_decks
+        if len(scrollareabuttons_2_noteNames):
+            for button in scrollareabuttons_2_noteNames:
+                button.deleteLater()
+            scrollareabuttons_2_noteNames = []
+        if len(scrollareabuttons_decks):
+            for button in scrollareabuttons_decks:
+                button.deleteLater()
+            scrollareabuttons_decks = []
         # successful,message,htmlcode = api_view_deck()
         self.ui.label.setText('Previous Notes')
         successful, message, code = notelyConnection.get_folder_content_user('Uncategorized')
         if successful:
             print(message.list_notes)
-            buttons = []
             if not message.list_notes:
                 print('no uncategotized notes available')
             else:
-                for note in message.list_notes:
-                    print(note)
+                for note_name in message.list_notes:
+                    print(note_name)
                     palette = QtGui.QPalette()
                     font = QtGui.QFont()
                     font.setFamily("Edwardian Script ITC")
@@ -181,56 +207,67 @@ class TestWindow(QtWidgets.QMainWindow):
                     self.ui.button = QtWidgets.QPushButton(self.ui.scrollAreaWidgetContents)
                     self.ui.button.setFont(font)
                     # self.ui.button.setGeometry(QtCore.QRect(750, 160 + 150 * message.list_notes.index(note), 241, 121))
-                    self.ui.button.setGeometry(QtCore.QRect(50, 20 + 140 * message.list_notes.index(note), 241, 121))
+                    self.ui.button.setGeometry(QtCore.QRect(50, 20 + 140 * message.list_notes.index(note_name), 241, 121))
                     self.ui.button.setPalette(palette)
                     self.ui.button.setStyleSheet("background-color: rgb(0, 0, 0, 0);")
-                    self.ui.button.setObjectName(note)
+                    self.ui.button.setObjectName(note_name)
                     _translate = QtCore.QCoreApplication.translate
                     self.ui.button.show()
-                    self.ui.button.setText(_translate("MainWindow", note))
-                    buttons.append(self.ui.button)
+                    self.ui.button.setText(_translate("MainWindow", note_name))
+                    scrollareabuttons_decks.append(self.ui.button)
+                    true, note, code = notelyConnection.get_note_user(note_name, 'Uncategorized')
+                    self.ui.button.clicked.connect(partial(self.show_note, note.name, note.data, 'Uncategorized'))
 
                 self.ui.scrollAreaWidgetContents.setMinimumHeight(20 + 140 * len(message.list_notes))
 
             print('##########################################################')
             print(message.list_notes)
-            for button in buttons:
-                # Here we connect category buttons so that their notes can be showed in another page
-                # self.button.clicked.connect(self.show_category_notes(self.button.objectName()))
-                true, note, code = notelyConnection.get_note_user(message.list_notes[buttons.index(button)], 'Uncategorized')
-                button.clicked.connect(partial(self.show_note, note.name, note.data, buttons, 'Uncategorized'))
 
-            self.ui.back_deck_page.clicked.connect(partial(self.deck_page_back, buttons))
+            self.ui.back_deck_page.clicked.connect(self.deck_page_back)
+
+    def delete_deck_notes(self, category):
+        notelyConnection.delete_folder_user(category)
+        self.view_decks()
 
     def show_category_notes(self, category_name):
+        self.ui.page_newnote_newnote_button.show()
+        global category_type
+        global scrollareabuttons_2_noteNames
+        if len(scrollareabuttons_2_noteNames):
+            for button in scrollareabuttons_2_noteNames:
+                button.deleteLater()
+            scrollareabuttons_2_noteNames = []
+
+        category_type = category_name
         print("show_category_notes successfully started")
         print(category_name)
         self.ui.stackedWidget.setCurrentIndex(7)
-
+        self.ui.label_2.setText(category_name)
         self.ui.page_newnote_shownote_textedit.hide()
-        palette = QtGui.QPalette()
-        font = QtGui.QFont()
-        font.setFamily("Edwardian Script ITC")
-        font.setPointSize(54)
-        self.ui.categoryLabel = QtWidgets.QLabel(self.ui.page_6)
-        self.ui.categoryLabel.setFont(font)
-        self.ui.categoryLabel.setGeometry(QtCore.QRect(230, 90, 400, 200))
-        self.ui.categoryLabel.setPalette(palette)
-        self.ui.categoryLabel.setStyleSheet("background-color: rgb(0, 0, 0, 0);")
-        self.ui.categoryLabel.setObjectName(category_name)
-        _translate = QtCore.QCoreApplication.translate
-        self.ui.categoryLabel.show()
-        self.ui.categoryLabel.setText(_translate("MainWindow", category_name))
+        # palette = QtGui.QPalette()
+        # font = QtGui.QFont()
+        # font.setFamily("Edwardian Script ITC")
+        # font.setPointSize(54)
+        # self.ui.categoryLabel = QtWidgets.QLabel(self.ui.page_6)
+        # self.ui.categoryLabel.setFont(font)
+        # self.ui.categoryLabel.setGeometry(QtCore.QRect(230, 90, 400, 200))
+        # self.ui.categoryLabel.setPalette(palette)
+        # self.ui.categoryLabel.setStyleSheet("background-color: rgb(0, 0, 0, 0);")
+        # self.ui.categoryLabel.setObjectName(category_name)
+        # _translate = QtCore.QCoreApplication.translate
+        # self.ui.categoryLabel.show()
+        # self.ui.categoryLabel.setText(_translate("MainWindow", category_name))
 
         # New Note button
-        self.ui.page_newnote_newnote_button.clicked.connect(lambda: self.create_new_note(category_name))
+        self.ui.page_newnote_newnote_button.clicked.connect(partial(self.create_new_note, category_name))
         # Delete Note button
+        self.ui.page_newnote_delete_button_2.disconnect()
+        self.ui.page_newnote_delete_button_2.clicked.connect(partial(self.delete_deck_notes, category_name))
 
         successful, message, code = notelyConnection.get_folder_content_user(category_name)
         print("liiiiiiiiist")
         print(message.list_notes)
         if successful:
-            buttons = []
             for noteName in message.list_notes:
                 print(noteName)
                 # button = QtWidgets.QPushButton(category)
@@ -248,36 +285,48 @@ class TestWindow(QtWidgets.QMainWindow):
                 self.ui.button.show()
                 _translate = QtCore.QCoreApplication.translate
                 self.ui.button.setText(_translate("MainWindow", noteName))
-                buttons.append(self.ui.button)
+                scrollareabuttons_2_noteNames.append(self.ui.button)
+                succ, note, code = notelyConnection.get_note_user(noteName, category_name)
+                self.ui.button.clicked.connect(partial(self.show_note, noteName, note.data, category_name))
 
             self.ui.scrollAreaWidgetContents_2.setMinimumHeight(20 + 140 * len(message.list_notes))
+            self.ui.back_show_note_page.clicked.connect(partial(self.show_notes_page_back))
 
-            for button in buttons:
-                print(type(button.objectName()), type(category_name))
-                # Here we connect noteName buttons so that their contents can be showed in another page
-                succ, note, code = notelyConnection.get_note_user(button.objectName(), category_name)
-                button.clicked.connect(partial(self.show_note, button.objectName(), note.data, buttons, category_name))
-
-            self.ui.back_show_note_page.clicked.connect(partial(self.show_notes_page_back, buttons, self.ui.categoryLabel))
-
-    def show_notes_page_back(self, buttons, label):
+    def show_notes_page_back(self):
         self.ui.stackedWidget.setCurrentIndex(5)
-        label.deleteLater()
-        for button in buttons:
-            button.deleteLater()
+        self.ui.label.setText('My Decks')
+        global scrollareabuttons_2_noteNames
+        if len(scrollareabuttons_2_noteNames):
+            for button in scrollareabuttons_2_noteNames:
+                button.deleteLater()
+            scrollareabuttons_2_noteNames = []
         self.ui.back_show_note_page.disconnect()
 
-    def show_note(self, noteName, noteContent, buttons, category):
+    def show_note(self, noteName, noteContent, category):
+        global scrollareabuttons_2_noteNames
+        if len(scrollareabuttons_2_noteNames):
+            for button in scrollareabuttons_2_noteNames:
+                button.deleteLater()
+            scrollareabuttons_2_noteNames = []
         self.ui.stackedWidget.setCurrentIndex(7)
+        self.ui.label_2.setText(noteName)
         print("clicked")
-        for button in buttons:
-            button.deleteLater()
-            print('button deleted')
         self.ui.page_newnote_shownote_textedit.insertPlainText(noteContent)
         self.ui.page_newnote_shownote_textedit.setDisabled(True)
         self.ui.page_newnote_shownote_textedit.show()
+
+        self.ui.page_newnote_newnote_button.hide()
+        self.ui.page_newnote_edit_button.show()
+
         self.ui.reminder_dateTime_edit.hide()
         self.ui.dateTime_edit_done_button.hide()
+
+        # Edit Button connection
+        self.ui.page_newnote_edit_button.clicked.connect(partial(self.edit_note, noteName, category))
+
+        # Delete Note button
+        self.ui.page_newnote_delete_button_2.disconnect()
+        self.ui.page_newnote_delete_button_2.clicked.connect(partial(self.delete_note, category, noteName))
 
         # Back Button
         self.ui.back_show_note_page.disconnect()
@@ -288,7 +337,35 @@ class TestWindow(QtWidgets.QMainWindow):
         else:
             self.ui.back_show_note_page.clicked.connect(partial(self.show_category_notes, category))
 
-    def save_note(self, foldername):
+    def edit_note(self, noteName, category):
+        self.ui.page_newnote_shownote_textedit.setDisabled(False)
+        # self.ui.page_newnote_note_textedit.hide()
+        self.ui.page_newnote_edit_button.hide()
+        self.ui.page_newnote_update_button.show()
+
+        # Old note notelyNote
+        true, oldNotelyNote, code = notelyConnection.get_note_user(noteName, category)
+
+        # Update Button connection
+        self.ui.page_newnote_update_button.clicked.connect(partial(self.update_note, noteName, category, oldNotelyNote))
+
+    def update_note(self, noteName, category, oldNotelyNote):
+        newNotelyNote = NotelyNote(noteName, category, self.ui.page_newnote_shownote_textedit.toPlainText(),
+                                   oldNotelyNote.reminder)
+        notelyConnection.update_note_user(newNotelyNote, oldNotelyNote)
+
+        self.ui.page_newnote_update_button.hide()
+        self.ui.page_newnote_newnote_button.show()
+        self.ui.page_newnote_delete_button_2.show()
+        self.show_category_notes(category)
+
+        self.ui.page_newnote_shownote_textedit.clear()
+
+    def delete_note(self, category, noteName):
+        notelyConnection.delete_note_user(noteName, category)
+        self.show_category_notes(category)
+
+    def save_note(self):
         global category_type, reminder_dateTime, reminderIsSet
         print('hello')
         name = self.ui.note_name_text_edit.toPlainText()
@@ -299,16 +376,27 @@ class TestWindow(QtWidgets.QMainWindow):
             print('There is a reminder')
             notelyNote = NotelyNote(name, category_type, content, reminder_dateTime)
             notelyConnection.add_note_user(notelyNote)
+            print(notelyNote.folder_name)
             category_type = 'Uncategorized'
+            print(notelyNote.folder_name)
             reminderIsSet = False
             self.open_mainMenu_page()
+
+            # Clearance of textEdit
+            self.ui.note_name_text_edit.clear()
+            self.ui.page_newnote_note_textedit.clear()
+
         else:
             print('no reminder')
-            notelyNote = NotelyNote(name, 'Uncategorized', content)
+            notelyNote = NotelyNote(name, category_type, content)
             notelyConnection.add_note_user(notelyNote)
             category_type = 'Uncategorized'
             reminder_dateTime = None
             self.open_mainMenu_page()
+
+            # Clearance of textEdit
+            self.ui.note_name_text_edit.clear()
+            self.ui.page_newnote_note_textedit.clear()
 
     def popup_deck_name_entry(self):
         self.ui.new_deck_name_label.show()

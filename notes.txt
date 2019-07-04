@@ -1,1 +1,4 @@
 pyuic4 input.ui -o output.py
+
+# if pyuic4 is not installed and you're on windows you could use:
+python.exe -m PyQt5.uic.pyuic input.ui -o output.py

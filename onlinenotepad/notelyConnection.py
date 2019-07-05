@@ -1,6 +1,7 @@
 import requests
 import json
 from notelyClasses import NotelyNote, NotelyFolder, datatime_m_to_dict, datatime_r_to_dict
+from datetime import datetime
 
 
 session_server = None
@@ -58,6 +59,13 @@ def signup_user(username, password, email, first_name, last_name):
 
 def add_note_user(notely_note):
     res = send_request("note/add/", notely_note.to_dict(), "POST")
+    print(res.text)
+    return (res.status_code == 200), res.text, res.status_code
+
+
+def trigger_reminder(new_note):
+    time_left = int((new_note.reminder - datetime.now()).total_seconds())
+    res = send_request("note/timer/", {"note_name": new_note.name, "time_left": time_left}, 'POST')
     print(res.text)
     return (res.status_code == 200), res.text, res.status_code
 

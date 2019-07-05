@@ -6,8 +6,8 @@ import json
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.middleware.csrf import get_token
-
-# TODO: find a way to manage the reminder, check how we sent emails for starters
+import threading
+from accounts.notelyTools import email_reminder
 
 
 @require_http_methods(["GET", "POST"])
@@ -80,7 +80,6 @@ def add_note(request):
                                    h_m=int(json_data['h_m']), min_m=int(json_data['min_m']),
                                    s_m=int(json_data['s_m']), user=request.user)
         note.save()
-        print(note.name, note.data, note.folder_name)
         folder = Folder.objects.filter(name=note.folder_name, user=request.user).first()
         if folder.list_notes == '':
             folder.list_notes = note.name
@@ -190,7 +189,8 @@ def get_folder_list(request):
     if not request.user.is_authenticated:
         response = HttpResponse('Not signed in', status=403)
     else:
-        folder_set = list(Folder.objects.filter(user=request.user).exclude(name='Uncategorized').values_list('name', flat=True))
+        folder_set = list(Folder.objects.filter(user=request.user).exclude(name='Uncategorized').values_list('name',
+                                                                                                             flat=True))
         response = HttpResponse(json.dumps(folder_set), status=200)
     return response
 
@@ -223,3 +223,18 @@ def delete_folder(request):
             Note.objects.filter(folder_name=json_data['name'], user=request.user)
             response = HttpResponse('Successfully deleted the folder and its notes', status=200)
     return response
+
+
+@require_POST
+def start_timer(request):
+    json_data = json.loads(request.body)
+    if not request.user.is_authenticated:
+        response = HttpResponse('Not signed in', status=403)
+    else:
+        threading.Thread(target=email_reminder, args=(request.user.email, request.user.first_name,
+                                                        json_data['note_name'], int(json_data['time_left']))).start()
+        response = HttpResponse('Timer Started Successfully', status=200)
+    return response
+
+
+
